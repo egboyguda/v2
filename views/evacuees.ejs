@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"
+    />
+  </head>
+  <body>
+    <h1>Evacuees</h1>
+    <h2 id="date"><%= date%></h2>
+    <p id="_id" style="display: none"><%=_id%></p>
+    <p id="isMili" style="display: none"><%= isMili%></p>
+    <table id="example">
+      <thead>
+        <tr>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+      integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        alert("hello");
+        sendData();
+      });
+
+      function sendData() {
+        var date = document.getElementById("date").innerHTML;
+        var _id = document.getElementById("_id").innerHTML;
+        var isMili = document.getElementById("isMili").innerHTML;
+
+        axios
+          .get("/evac", {
+            params: {
+              date: date,
+              _id: _id,
+              isMili: isMili,
+            },
+          })
+          .then((res) => {
+            console.log(res.data);
+            var date = moment(res.data.date).format("YYYY-MM-DD");
+            $("#example").DataTable({
+              data: res.data,
+              dom: "Bfrtip",
+              columns: [
+                {
+                  data: "name",
+                },
+              ],
+              buttons: [
+                {
+                  extend: "pdfHtml5",
+                  title: `Evacuess on ${date}`,
+                  download: "open",
+                  customize: function (doc) {
+                    doc.content[1].table.widths = Array(
+                      doc.content[1].table.body[0].length + 1
+                    )
+                      .join("*")
+                      .split("");
+                  },
+                },
+              ],
+            });
+          });
+      }
+    </script>
+  </body>
+</html>
